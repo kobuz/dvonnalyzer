@@ -5,10 +5,13 @@
     </head>
     <body>
         <h1>Welcome to Dvonnalyzer</h1>
-        <form method="post" action="game">
-            {{ csrf|safe }}
-            <input type="text" name="game-id">
-            <input type="submit" value="Go go go">
-        </form>
+        <p>Upload game from LittleGolem
+            <form method="post" action="game">
+                {{ csrf|safe }}
+                <input type="text" name="game-id">
+                <input type="submit" value="Go go go">
+            </form>
+        </p>
+        <p>Or just check a <a href="/game/demo">demo</a></p>
     </body>
 </html>
