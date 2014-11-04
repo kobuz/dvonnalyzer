@@ -1,0 +1,14 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+        <title>Dvonnalyzer home</title>
+    </head>
+    <body>
+        <h1>Welcome to Dvonnalyzer</h1>
+        <form method="post" action="game">
+            {{ csrf|safe }}
+            <input type="text" name="game-id">
+            <input type="submit" value="Go go go">
+        </form>
+    </body>
+</html>
