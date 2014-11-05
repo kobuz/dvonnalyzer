@@ -12,17 +12,25 @@
   [id-or-url]
   (re-find #"\d+" id-or-url))
 
+(defn- extract-metadata
+  [game-file]
+  (->> game-file
+       (re-seq #"(\w+) \[(.+?)\]")
+       (map #(vector (-> (second %) str/lower-case keyword)
+                     (last %)))
+       flatten
+       (apply hash-map)))
+
 (defn- little-golem-game-url
   [game-id]
   (str "http://www.littlegolem.net/servlet/sgf/"
        game-id "/game" game-id ".txt"))
 
-(defn- get-players
-  [game-file]
-  (let [white (last (re-find #"White \[(.+?)\]" game-file))
-        black (last (re-find #"Black \[(.+?)\]" game-file))]
-    {:white white
-     :black black}))
+(defn- str->vec-of-ints
+  "Change symbolic coordinates to vector of ints, eg. \"b5\" -> [1, 4]"
+  [s]
+  (vector (- (int (first s)) (int \a))
+          (- (int (second s)) (int \1))))
 
 (defn- get-moves
   [game-file]
@@ -36,9 +44,9 @@
 
 (defn- parse-game-file
   [game-file]
-  (let [players (get-players game-file)
+  (let [meta (extract-metadata game-file)
         moves (get-moves game-file)]
-    (str moves)))
+    (str meta moves)))
 
 (defroutes app-routes
   (GET "/" [] (render-file "templates/home.html"
