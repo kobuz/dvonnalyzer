@@ -1,5 +1,6 @@
 (ns dvonnalyzer.core.handler
-  (:require [compojure.core :refer :all]
+  (:require [clojure.string :as str]
+            [compojure.core :refer :all]
             [compojure.route :as route]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [selmer.parser :refer [render-file]]
@@ -16,9 +17,28 @@
   (str "http://www.littlegolem.net/servlet/sgf/"
        game-id "/game" game-id ".txt"))
 
+(defn- get-players
+  [game-file]
+  (let [white (last (re-find #"White \[(.+?)\]" game-file))
+        black (last (re-find #"Black \[(.+?)\]" game-file))]
+    {:white white
+     :black black}))
+
+(defn- get-moves
+  [game-file]
+  (let [terms (-> game-file
+                  (str/split #"\]")
+                  (last)
+                  (str/trim)
+                  (str/split #" "))
+        unnecessary-number? #(re-find #"\d+\." %)]
+    (vec (remove unnecessary-number? terms))))
+
 (defn- parse-game-file
   [game-file]
-  game-file)
+  (let [players (get-players game-file)
+        moves (get-moves game-file)]
+    (str moves)))
 
 (defroutes app-routes
   (GET "/" [] (render-file "templates/home.html"
