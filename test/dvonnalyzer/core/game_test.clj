@@ -36,6 +36,24 @@
       (is (= (:a1 board)
              {:color :black :stack 1 :dvonn 0}))))
 
+  (testing "distance"
+    (is (= (game/distance :a1 :a1) 0))
+    (is (= (game/distance :a1 :a3) 2))
+    (is (= (game/distance :a1 :e1) 4))
+    (is (= (game/distance :a1 :c3) 2))
+    (is (= (game/distance :a1 :b3) nil)))
+
+  (testing "can move piece"
+    (let [board (-> (game/empty-board)
+                    (game/put-dvonn-piece :c2)
+                    (game/put-piece :c1 :black)
+                    (game/put-piece :b1 :white))]
+      (is (true? (game/can-move-piece? board :c1 :c2 :black)))
+      (is (false? (game/can-move-piece? board :c1 :c2 :white)))
+      (is (false? (game/can-move-piece? board :c1 :c3 :black)))
+      (is (true? (game/can-move-piece? board :c1 :b1 :black)))
+      (is (true? (game/can-move-piece? board :c1 :d1 :black)))))
+
   (testing "move piece"
     (let [board (-> (game/empty-board)
                     (game/put-dvonn-piece :c2)

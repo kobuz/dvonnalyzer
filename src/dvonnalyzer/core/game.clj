@@ -1,5 +1,7 @@
 (ns dvonnalyzer.core.game)
 
+(defn abs [n] (if (pos? n) n (- n)))
+
 (defn char-range
   "Return range of characters including end."
   [start end]
@@ -16,19 +18,42 @@
     (zipmap final-coords (repeat :empty))))
 
 (defn can-put-piece?
-  [board place]
-  (= (place board) :empty))
+  [board to]
+  (= (to board) :empty))
 
 (defn put-dvonn-piece
-  [board place]
-  (assoc board place {:stack 1
+  [board to]
+  (assoc board to {:stack 1
                       :dvonn 1}))
 
 (defn put-piece
-  [board place player]
-  (assoc board place {:color player
+  [board to player]
+  (assoc board to {:color player
                       :stack 1
                       :dvonn 0}))
+
+(defn distance
+  [from to]
+  (let [transform (fn [x] (map int (name x)))
+        [fromX fromY] (transform from)
+        [toX toY] (transform to)
+        diffX (abs (- fromX toX))
+        diffY (abs (- fromY toY))]
+    (cond
+      (zero? diffX) diffY
+      (zero? diffY) diffX
+      (= diffX diffY) diffX
+      :else nil)))
+
+(defn can-move-piece?
+  [board from to player]
+  (let [origin (from board)
+        target (to board)]
+    (and origin
+         target
+         (= (:color origin) player)
+         (= (distance from to)
+            (:stack origin)))))
 
 (defn move-piece
   [board from to]
