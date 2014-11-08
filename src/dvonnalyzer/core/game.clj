@@ -19,9 +19,10 @@
   [board place]
   (= (place board) :empty))
 
-(defn place-dvonn-piece
+(defn put-dvonn-piece
   [board place]
-  (assoc board place {:dvonn 1}))
+  (assoc board place {:stack 1
+                      :dvonn 1}))
 
 (defn put-piece
   [board place player]
@@ -30,11 +31,11 @@
                       :dvonn 0}))
 
 (defn move-piece
-  [board from to player]
-  (let [getter (fn [key] map #(get-in [% key]) [from to])
+  [board from to]
+  (let [getter (fn [key] (map #(get-in board [% key]) [from to]))
         stack (reduce + (getter :stack))
         dvonn (reduce + (getter :dvonn))]
     (merge board {from :empty
-                  to {:color player
+                  to {:color (get-in board [from :color])
                       :stack stack
                       :dvonn dvonn}})))
