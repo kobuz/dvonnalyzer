@@ -1,4 +1,4 @@
-(ns dvonnalyzer.core.handler
+(ns dvonnalyzer.handler
   (:require [clojure.string :as str]
             [compojure.core :refer :all]
             [compojure.route :as route]

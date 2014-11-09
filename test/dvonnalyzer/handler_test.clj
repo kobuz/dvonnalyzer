@@ -1,7 +1,7 @@
-(ns dvonnalyzer.core.handler-test
+(ns dvonnalyzer.handler-test
   (:require [clojure.test :refer :all]
             [ring.mock.request :as mock]
-            [dvonnalyzer.core.handler :as handler]))
+            [dvonnalyzer.handler :as handler]))
 
 (deftest test-app
   (testing "main route"

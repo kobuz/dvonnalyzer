@@ -1,6 +1,6 @@
-(ns dvonnalyzer.core.game-test
+(ns dvonnalyzer.game-test
   (:require [clojure.test :refer :all]
-            [dvonnalyzer.core.game :as game]))
+            [dvonnalyzer.game :as game]))
 
 (deftest test-game
   (testing "char range"

@@ -18,7 +18,7 @@
           :output-to "resources/public/js/app.js"
           :optimizations :whitespace
           :pretty-print true}}]}
-  :ring {:handler dvonnalyzer.core.handler/app}
+  :ring {:handler dvonnalyzer.handler/app}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]]}})

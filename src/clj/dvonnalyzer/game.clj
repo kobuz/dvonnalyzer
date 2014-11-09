@@ -1,4 +1,4 @@
-(ns dvonnalyzer.core.game)
+(ns dvonnalyzer.game)
 
 (defn abs [n] (if (pos? n) n (- n)))
 
@@ -24,7 +24,7 @@
 (defn put-dvonn-piece
   [board to]
   (assoc board to {:stack 1
-                      :dvonn 1}))
+                   :dvonn 1}))
 
 (defn put-piece
   [board to player]
