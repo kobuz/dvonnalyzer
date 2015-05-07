@@ -29,8 +29,8 @@
 (defn put-piece
   [board to player]
   (assoc board to {:color player
-                      :stack 1
-                      :dvonn 0}))
+                   :stack 1
+                   :dvonn 0}))
 
 (defn distance
   [from to]
@@ -64,3 +64,31 @@
                   to {:color (get-in board [from :color])
                       :stack stack
                       :dvonn dvonn}})))
+
+(defn alternate-player
+  [player]
+  (if (= player :black) :white :black))
+
+(defn dvonn-phase
+  [record]
+  (let [pieces (take 3 record)]
+    (reductions put-dvonn-piece (empty-board) pieces)))
+
+(defn put-phase
+  [record board]
+  (loop [record (take 46 (drop 3 record))]
+    (reductions (fn [board [to player]] (put-piece to player)) board
+                (map vector board (repeat [:black :white])))))
+
+(defn move-phase
+  [record board]
+  (let [move-phase (drop 49 record)]
+    (reductions (fn [board [
+
+(defn load-game-record
+  [record]
+  (let [dvonn-phase (take 3 record)
+        normal-phase (take 46 (drop 3 record))
+        move-phase (drop 49 record)]
+    (loop [positions (list (empty-board))
+           player :black])))
