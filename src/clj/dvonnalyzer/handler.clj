@@ -30,12 +30,14 @@
   (let [game-data (parser/parse-file game-file)
         moves (game/apply-all-moves (:moves-by-phase game-data))
         dvonn-state (-> (:dvonn moves) last)
-        put-state (-> (:put moves) last)]
+        put-state (-> (:put moves) last)
+        move-state (-> (:move moves) last)]
     (render-file "templates/game.html"
                  {:game-data game-data
                   :game-name "demo"
                   :dvonn-state (str dvonn-state)
-                  :put-state (str put-state)})))
+                  :put-state (str put-state)
+                  :move-state (str move-state)})))
 
 (defroutes app-routes
   (GET "/" [] (render-file "templates/home.html"

@@ -56,14 +56,15 @@
             (:stack origin)))))
 
 (defn move-piece
-  [board from to]
-  (let [getter (fn [key] (map #(get-in board [% key]) [from to]))
+  ([board [from to]]
+  (let [getter (fn [key] (map #(get-in board [% key] 0) [from to]))
         stack (reduce + (getter :stack))
         dvonn (reduce + (getter :dvonn))]
     (merge board {from :empty
                   to {:color (get-in board [from :color])
                       :stack stack
                       :dvonn dvonn}})))
+  ([board [from to] player] (move-piece board [from to])))
 
 (defn alternate-player
   [player]
@@ -83,29 +84,38 @@
                new-board
                (conj acc {:board new-board
                           :number move-number
+                          :move current-move
                           :player player})))
       acc)))
+
+(defn- handle-special-moves
+  [move-fn]
+  (fn [board move player]
+    (cond
+     (= move :pass) board
+     (= move :resign) board
+     :else (move-fn board move player))))
 
 (defn- apply-dvonn-phase
   [moves]
   (apply-phase moves
                (empty-board)
                :white
-               put-dvonn-piece))
+               (handle-special-moves put-dvonn-piece)))
 
 (defn- apply-put-phase
   [moves board player]
   (apply-phase moves
                board
                player
-               put-piece))
+               (handle-special-moves put-piece)))
 
 (defn- apply-move-phase
   [moves board player]
   (apply-phase moves
                board
                player
-               move-piece))
+               (handle-special-moves move-piece)))
 
 (defn apply-all-moves
   [moves-by-phase]
@@ -115,7 +125,9 @@
                                    (:board last-dvonn)
                                    (alternate-player (:player last-dvonn)))
         last-put (last put-phase)
-        move-phase []]
+        move-phase (apply-move-phase (:move moves-by-phase)
+                                     (:board last-put)
+                                     (alternate-player (:player last-put)))]
     {:dvonn dvonn-phase
      :put put-phase
      :move move-phase}))
