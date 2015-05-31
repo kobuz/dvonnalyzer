@@ -7,20 +7,11 @@
             [ring.util.anti-forgery :refer [anti-forgery-field]]
             [ring.util.response :refer [redirect]]
             [clj-http.lite.client :as client]
-            [dvonnalyzer.game :as game]))
+            [dvonnalyzer.parser :as parser]))
 
 (defn- get-game-id
   [id-or-url]
   (re-find #"\d+" id-or-url))
-
-(defn- extract-metadata
-  [game-file]
-  (->> game-file
-       (re-seq #"(\w+) \[(.+?)\]")
-       (map #(vector (-> (second %) str/lower-case keyword)
-                     (last %)))
-       flatten
-       (apply hash-map)))
 
 (defn- little-golem-game-url
   [game-id]
@@ -33,23 +24,11 @@
   (vector (- (int (first s)) (int \a))
           (- (int (second s)) (int \1))))
 
-(defn- extract-moves
-  [game-file]
-  (let [terms (-> game-file
-                  (str/split #"\]")
-                  (last)
-                  (str/trim)
-                  (str/split #" "))
-                  unnecessary-number? #(re-find #"\d+\." %)]
-    (map vector (iterate inc 1) (remove unnecessary-number? terms))))
-
 (defn- parse-game-file
   [game-file]
-  (let [meta (extract-metadata game-file)
-        moves (extract-moves game-file)
-        record (game/load-game-record moves)]
+  (let [game-data (parser/parse-file game-file)]
     (do
-      (str record))))
+      (str game-data))))
 
 (defroutes app-routes
   (GET "/" [] (render-file "templates/home.html"

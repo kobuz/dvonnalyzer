@@ -79,20 +79,3 @@
   (loop [record (take 46 (drop 3 record))]
     (reductions (fn [board [to player]] (put-piece to player)) board
                 (map vector board (repeat [:black :white])))))
-
-(defn- phase-pred
-  [[idx mv]]
-  (let [dvonn-count 3
-        normal-count 46]
-    (cond
-      (<= idx dvonn-count) :dvonn
-      (<= idx (+ dvonn-count normal-count)) :normal
-      :else :move)))
-
-(defn- split-to-phases
-  [record]
-  (group-by phase-pred record))
-
-(defn load-game-record
-  [record]
-  (merge {:dvonn [] :normal [] :move []} (split-to-phases record)))
