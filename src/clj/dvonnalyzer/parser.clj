@@ -1,6 +1,14 @@
 (ns dvonnalyzer.parser
   (:require [clojure.string :as str]))
 
+(defn- make-keyword-move
+  [move]
+  (cond
+   (= (count move) 2) (keyword move)
+   (= move "pass") :pass
+   (= move "resign") :resign
+   :else (vec (map keyword (map #(apply str %) (partition 2 move))))))
+
 (defn- extract-moves
   "Returns sequence of moves as pair <number, move>."
   [game-file]
@@ -9,8 +17,10 @@
                   (last)
                   (str/trim)
                   (str/split #" "))
-                  unnecessary-number? #(re-find #"\d+\." %)]
-    (map vector (iterate inc 1) (remove unnecessary-number? terms))))
+                  unnecessary-number? #(re-find #"\d+\." %)
+        final-terms (remove unnecessary-number? terms)
+        keyword-moves (map make-keyword-move final-terms)]
+    (map vector (iterate inc 1) keyword-moves)))
 
 (defn- extract-metadata
   "Returns game metadata as map."
@@ -25,17 +35,17 @@
 (defn- phase-pred
   [[idx mv]]
   (let [dvonn-count 3
-        normal-count 46]
+        put-count 45]
     (cond
       (<= idx dvonn-count) :dvonn
-      (<= idx (+ dvonn-count normal-count)) :normal
+      (<= idx (+ dvonn-count put-count)) :put
       :else :move)))
 
 (defn- split-to-phases
   [moves]
   (->> moves
        (group-by phase-pred)
-       (merge {:dvonn [] :normal [] :move []})))
+       (merge {:dvonn [] :put [] :move []})))
 
 (defn parse-file
   [record]

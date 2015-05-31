@@ -18,8 +18,20 @@
         Phases:
         <ul>
             <li>Dvonn phase: {% for num, move in game-data.moves-by-phase.dvonn %} {{ move }} {% endfor %}</li>
-            <li>Put phase: {% for num, move in game-data.moves-by-phase.normal %} {{ move }} {% endfor %}</li>
+            <li>Put phase: {% for num, move in game-data.moves-by-phase.put %} {{ move }} {% endfor %}</li>
             <li>Move phase: {% for num, move in game-data.moves-by-phase.move %} {{ move }} {% endfor %}</li>
         </ul>
+    </p>
+    <p>
+        Last dvonn state:
+        {{ dvonn-state }}
+    </p>
+    <p>
+        Last put state:
+        {{ put-state }}
+    </p>
+    <p>
+        Last move state:
+        {{ move-state }}
     </p>
 {% endblock body %}

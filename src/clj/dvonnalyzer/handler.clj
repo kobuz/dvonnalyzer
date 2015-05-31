@@ -7,7 +7,8 @@
             [ring.util.anti-forgery :refer [anti-forgery-field]]
             [ring.util.response :refer [redirect]]
             [clj-http.lite.client :as client]
-            [dvonnalyzer.parser :as parser]))
+            [dvonnalyzer.parser :as parser]
+            [dvonnalyzer.game :as game]))
 
 (defn- get-game-id
   [id-or-url]
@@ -26,10 +27,15 @@
 
 (defn- parse-game-file
   [game-file]
-  (let [game-data (parser/parse-file game-file)]
+  (let [game-data (parser/parse-file game-file)
+        moves (game/apply-all-moves (:moves-by-phase game-data))
+        dvonn-state (-> (:dvonn moves) last)
+        put-state (-> (:put moves) last)]
     (render-file "templates/game.html"
                  {:game-data game-data
-                  :game-name "demo"})))
+                  :game-name "demo"
+                  :dvonn-state (str dvonn-state)
+                  :put-state (str put-state)})))
 
 (defroutes app-routes
   (GET "/" [] (render-file "templates/home.html"

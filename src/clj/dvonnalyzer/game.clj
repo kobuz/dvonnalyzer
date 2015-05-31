@@ -22,9 +22,9 @@
   (= (to board) :empty))
 
 (defn put-dvonn-piece
-  [board to]
-  (assoc board to {:stack 1
-                   :dvonn 1}))
+  ([board to] (assoc board to {:stack 1
+                               :dvonn 1}))
+  ([board to player] (put-dvonn-piece board to)))
 
 (defn put-piece
   [board to player]
@@ -46,7 +46,7 @@
       :else nil)))
 
 (defn can-move-piece?
-  [board from to player]
+  [board [from to] player]
   (let [origin (from board)
         target (to board)]
     (and origin
@@ -69,13 +69,53 @@
   [player]
   (if (= player :black) :white :black))
 
-(defn dvonn-phase
-  [record]
-  (let [pieces (take 3 record)]
-    (reductions put-dvonn-piece (empty-board) pieces)))
+(defn- apply-phase
+  "Produce a vector of boards for certain phase."
+  [moves initial-board initial-player move-fn]
+  (loop [remaining-moves moves
+         player initial-player
+         board initial-board
+         acc []]
+    (if-let [[move-number current-move] (first remaining-moves)]
+      (let [new-board (move-fn board current-move player)]
+        (recur (rest remaining-moves)
+               (alternate-player player)
+               new-board
+               (conj acc {:board new-board
+                          :number move-number
+                          :player player})))
+      acc)))
 
-(defn put-phase
-  [record board]
-  (loop [record (take 46 (drop 3 record))]
-    (reductions (fn [board [to player]] (put-piece to player)) board
-                (map vector board (repeat [:black :white])))))
+(defn- apply-dvonn-phase
+  [moves]
+  (apply-phase moves
+               (empty-board)
+               :white
+               put-dvonn-piece))
+
+(defn- apply-put-phase
+  [moves board player]
+  (apply-phase moves
+               board
+               player
+               put-piece))
+
+(defn- apply-move-phase
+  [moves board player]
+  (apply-phase moves
+               board
+               player
+               move-piece))
+
+(defn apply-all-moves
+  [moves-by-phase]
+  (let [dvonn-phase (apply-dvonn-phase (:dvonn moves-by-phase))
+        last-dvonn (last dvonn-phase)
+        put-phase (apply-put-phase (:put moves-by-phase)
+                                   (:board last-dvonn)
+                                   (alternate-player (:player last-dvonn)))
+        last-put (last put-phase)
+        move-phase []]
+    {:dvonn dvonn-phase
+     :put put-phase
+     :move move-phase}))
