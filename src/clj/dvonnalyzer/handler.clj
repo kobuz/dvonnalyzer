@@ -6,7 +6,8 @@
             [selmer.parser :refer [render-file]]
             [ring.util.anti-forgery :refer [anti-forgery-field]]
             [ring.util.response :refer [redirect]]
-            [clj-http.lite.client :as client]))
+            [clj-http.lite.client :as client]
+            [dvonnalyzer.game :as game]))
 
 (defn- get-game-id
   [id-or-url]
@@ -32,21 +33,23 @@
   (vector (- (int (first s)) (int \a))
           (- (int (second s)) (int \1))))
 
-(defn- get-moves
+(defn- extract-moves
   [game-file]
   (let [terms (-> game-file
                   (str/split #"\]")
                   (last)
                   (str/trim)
                   (str/split #" "))
-        unnecessary-number? #(re-find #"\d+\." %)]
-    (vec (remove unnecessary-number? terms))))
+                  unnecessary-number? #(re-find #"\d+\." %)]
+    (map vector (iterate inc 1) (remove unnecessary-number? terms))))
 
 (defn- parse-game-file
   [game-file]
   (let [meta (extract-metadata game-file)
-        moves (get-moves game-file)]
-    (str meta moves)))
+        moves (extract-moves game-file)
+        record (game/load-game-record moves)]
+    (do
+      (str record))))
 
 (defroutes app-routes
   (GET "/" [] (render-file "templates/home.html"
