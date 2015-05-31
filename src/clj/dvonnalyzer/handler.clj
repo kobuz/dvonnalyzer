@@ -27,8 +27,9 @@
 (defn- parse-game-file
   [game-file]
   (let [game-data (parser/parse-file game-file)]
-    (do
-      (str game-data))))
+    (render-file "templates/game.html"
+                 {:game-data game-data
+                  :game-name "demo"})))
 
 (defroutes app-routes
   (GET "/" [] (render-file "templates/home.html"

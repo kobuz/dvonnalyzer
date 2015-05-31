@@ -41,7 +41,7 @@
   [record]
   (let [metadata (extract-metadata record)
         moves (extract-moves record)
-        moves-by-phases (split-to-phases moves)]
+        moves-by-phase (split-to-phases moves)]
     {:metadata metadata
      :moves moves
-     :moves-by-phases moves-by-phases}))
+     :moves-by-phase moves-by-phase}))

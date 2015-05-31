@@ -6,7 +6,7 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [compojure "1.2.0"]
                  [ring/ring-defaults "0.1.2"]
-                 [selmer "0.7.2"]
+                 [selmer "0.8.2"]
                  [clj-http-lite "0.2.0"]
                  [org.clojure/clojurescript "0.0-2371"]]
   :plugins [[lein-ring "0.8.13"]

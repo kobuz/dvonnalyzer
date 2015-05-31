@@ -1,19 +1,15 @@
-<html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
-        <title>Dvonnalyzer home</title>
-    </head>
-    <body>
-        <h1>Welcome to Dvonnalyzer</h1>
-        <p>Upload game from LittleGolem
-            <form method="post" action="game">
-                {{ csrf|safe }}
-                <input type="text" name="game-id">
-                <input type="submit" value="Go go go">
-            </form>
-        </p>
-        <p>Or just check a <a href="/game/demo">demo</a></p>
+{% extends "templates/base.html" %}
 
-        <script src="js/app.js"></script>
-    </body>
-</html>
+{% block body %}
+    <h1>Welcome to Dvonnalyzer</h1>
+    <p>Upload game from LittleGolem
+        <form method="post" action="game">
+            {{ csrf|safe }}
+            <input type="text" name="game-id">
+            <input type="submit" value="Go go go">
+        </form>
+    </p>
+    <p>Or just check a <a href="/game/demo">demo</a></p>
+
+    <script src="js/app.js"></script>
+{% endblock body %}

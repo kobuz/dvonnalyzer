@@ -1,0 +1,25 @@
+{% extends "templates/base.html" %}
+{% block title %}{{ game-name }}{% endblock %}
+
+{% block body %}
+    <p>
+        Metadata
+        <ul>
+        {% for key, val in game-data.metadata %}
+            <li>{{ key }}: {{ val }}</li>
+        {% endfor %}
+        </ul>
+    </p>
+    <p>
+        Moves:
+        {% for num, move in game-data.moves %} {{ move }} {% endfor %}
+    </p>
+    <p>
+        Phases:
+        <ul>
+            <li>Dvonn phase: {% for num, move in game-data.moves-by-phase.dvonn %} {{ move }} {% endfor %}</li>
+            <li>Put phase: {% for num, move in game-data.moves-by-phase.normal %} {{ move }} {% endfor %}</li>
+            <li>Move phase: {% for num, move in game-data.moves-by-phase.move %} {{ move }} {% endfor %}</li>
+        </ul>
+    </p>
+{% endblock body %}
