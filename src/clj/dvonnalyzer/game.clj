@@ -103,12 +103,23 @@
                :white
                (handle-special-moves put-dvonn-piece)))
 
+(defn- complement-last-put
+  "Last player doesn't have too much of a choice so his stone is put automatically."
+  [board player]
+  (let [move (-> (filter #(= (get board %) :empty) (keys board)) first)]
+    (put-piece board move player)))
+
 (defn- apply-put-phase
   [moves board player]
-  (apply-phase moves
-               board
-               player
-               (handle-special-moves put-piece)))
+  (let [states (apply-phase moves
+                            board
+                            player
+                            (handle-special-moves put-piece))
+        last-state (last states)
+        last-index (dec (count states))
+        new-board (complement-last-put (:board last-state)
+                                       (alternate-player (:player last-state)))]
+    (assoc-in states [last-index :board] new-board)))
 
 (defn- apply-move-phase
   [moves board player]
