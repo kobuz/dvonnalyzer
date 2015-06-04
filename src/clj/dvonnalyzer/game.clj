@@ -46,7 +46,7 @@
       :else nil)))
 
 (defn can-move-piece?
-  [board [from to] player]
+  [board from to player]
   (let [origin (from board)
         target (to board)]
     (and origin

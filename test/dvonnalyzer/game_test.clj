@@ -1,6 +1,7 @@
 (ns dvonnalyzer.game-test
   (:require [clojure.test :refer :all]
-            [dvonnalyzer.game :as game]))
+            [dvonnalyzer.game :as game]
+            [dvonnalyzer.parser :as parser]))
 
 (deftest test-game
   (testing "char range"
@@ -55,21 +56,32 @@
       (is (true? (game/can-move-piece? board :c1 :d1 :black)))))
 
   (testing "move piece"
-    (let [board (-> (game/empty-board)
+    (let [initial-board (-> (game/empty-board)
                     (game/put-dvonn-piece :c2)
                     (game/put-piece :c1 :black)
                     (game/put-piece :c3 :white))]
       (testing "over dvonn piece"
-        (let [board (game/move-piece board :c3 :c2)]
+        (let [board (game/move-piece initial-board [:c3 :c2])]
           (is (= (:c3 board) :empty))
           (is (= (:c2 board)
                  {:color :white
                   :stack 2
                   :dvonn 1}))))
       (testing "over opponents piece"
-        (let [board (game/move-piece board :c3 :c1)]
+        (let [board (game/move-piece initial-board [:c3 :c1])]
           (is (= (:c3 board) :empty))
           (is (= (:c1 board)
                  {:color :white
                   :stack 2
-                  :dvonn 0})))))))
+                  :dvonn 0}))))))
+
+  (testing "alternate player"
+    (is (= (game/alternate-player :black) :white))
+    (is (= (game/alternate-player :white) :black)))
+
+  (testing "apply all moves"
+    (let [content (slurp "resources/games/demo.txt")
+          game-data (parser/parse-file content)
+          moves (game/apply-all-moves (:moves-by-phase game-data))]
+      (is (= (->> (:dvonn moves) last :board vals (remove #(= :empty %)) count) 3))
+      (is (= (->> (:put moves) last :board vals (filter #(= :empty %)) count) 0)))))
