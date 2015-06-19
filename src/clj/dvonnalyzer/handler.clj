@@ -19,12 +19,6 @@
   (str "http://www.littlegolem.net/servlet/sgf/"
        game-id "/game" game-id ".txt"))
 
-(defn- str->vec-of-ints
-  "Change symbolic coordinates to vector of ints, eg. \"b5\" -> [1, 4]"
-  [s]
-  (vector (- (int (first s)) (int \a))
-          (- (int (second s)) (int \1))))
-
 (defn- parse-game-file
   [game-file]
   (let [game-data (parser/parse-file game-file)

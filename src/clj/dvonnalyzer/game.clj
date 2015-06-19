@@ -109,6 +109,55 @@
   (let [move (-> (filter #(= (get board %) :empty) (keys board)) first)]
     (put-piece board move player)))
 
+(defn find-dvonn
+  [board]
+  (for [[coord stack] board
+    :when (> (get stack :dvonn 0) 0)]
+    coord))
+
+(defn coord->vec
+  "Change symbolic coordinates to vector of ints, eg. \"b5\" -> [1, 4]"
+  [s]
+  (let [to-int #(-> s name % int)]
+    (vector (- (to-int first) (int \a))
+            (- (to-int second) (int \1)))))
+
+(defn vec->coord
+  [v]
+  (keyword (apply str (map char [(+ (first v) (int \a))
+                                 (+ (second v) (int \1))]))))
+
+(defn neighbours
+  [board from]
+  (let [curr (coord->vec from)
+        moves [[0 1]
+               [0 -1]
+               [1 0]
+               [-1 0]
+               [1 1]
+               [-1 -1]]]
+    (->> (map #(map + curr %) moves)
+         (map vec->coord)
+         (filterv #(not= (get board % :empty) :empty)))))
+
+(defn find-accessible
+  [board from]
+  (loop [visited (set [from])
+         queue '(from)]
+    (if-let [node (first queue)]
+      (let [nei (neighbours board node)
+            new-nei (remove visited nei)]
+        (recur (into #{} (concat visited new-nei))
+               (concat (rest queue) new-nei)))
+      (vec visited))))
+
+(defn- drop-dead-spots
+  "Remove spots that have no connection to dvonn pieces."
+  [board]
+  (let [dvonn-pieces (find-dvonn board)
+        accessible (mapcat (partial find-accessible board) dvonn-pieces)]
+    nil))
+
 (defn- apply-put-phase
   [moves board player]
   (let [states (apply-phase moves
