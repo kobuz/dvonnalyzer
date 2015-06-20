@@ -99,8 +99,9 @@
                     (game/put-piece :g4 :black)
                     (game/put-piece :k5 :white))]
       (is (= (set (game/find-dvonn board)) #{:d2 :g3}))
-      (is (= (set (game/find-accessible board :d2)) #{:d2 :d1 :c1}))
-      (is (= (set (game/find-accessible board :g1))) #{:g3 :g4})))
+      (is (= (set (game/find-accessible board :d2)) #{:d2 :e2 :d1 :c1}))
+      (is (= (set (game/find-accessible board :g3))) #{:g3 :g4})
+      (is (= (set (game/find-accessible board :k5)) #{:k5}))))
 
   (testing "apply all moves"
     (let [content (slurp "resources/games/demo.txt")

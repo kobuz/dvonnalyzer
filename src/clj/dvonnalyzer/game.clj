@@ -55,15 +55,18 @@
          (= (distance from to)
             (:stack origin)))))
 
+(declare drop-dead-spots)
+
 (defn move-piece
   ([board [from to]]
   (let [getter (fn [key] (map #(get-in board [% key] 0) [from to]))
         stack (reduce + (getter :stack))
         dvonn (reduce + (getter :dvonn))]
-    (merge board {from :empty
-                  to {:color (get-in board [from :color])
-                      :stack stack
-                      :dvonn dvonn}})))
+    (drop-dead-spots
+     (merge board {from :empty
+                   to {:color (get-in board [from :color])
+                       :stack stack
+                       :dvonn dvonn}}))))
   ([board [from to] player] (move-piece board [from to])))
 
 (defn alternate-player
@@ -142,8 +145,8 @@
 
 (defn find-accessible
   [board from]
-  (loop [visited (set [from])
-         queue '(from)]
+  (loop [visited (hash-set from)
+         queue (list from)]
     (if-let [node (first queue)]
       (let [nei (neighbours board node)
             new-nei (remove visited nei)]
@@ -155,8 +158,8 @@
   "Remove spots that have no connection to dvonn pieces."
   [board]
   (let [dvonn-pieces (find-dvonn board)
-        accessible (mapcat (partial find-accessible board) dvonn-pieces)]
-    nil))
+        accessible (set (mapcat (partial find-accessible board) dvonn-pieces))]
+    (merge (empty-board) (filter #(accessible (first %)) board))))
 
 (defn- apply-put-phase
   [moves board player]
