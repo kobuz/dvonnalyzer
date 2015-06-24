@@ -62,14 +62,14 @@
                     (game/put-piece :c3 :white))]
       (testing "over dvonn piece"
         (let [board (game/move-piece initial-board [:c3 :c2])]
-          (is (= (:c3 board) :empty))
+          (is (= (:c3 board) :blank))
           (is (= (:c2 board)
                  {:color :white
                   :stack 2
                   :dvonn 1}))))
       (testing "over opponents piece"
         (let [board (game/move-piece initial-board [:c3 :c1])]
-          (is (= (:c3 board) :empty))
+          (is (= (:c3 board) :blank))
           (is (= (:c1 board)
                  {:color :white
                   :stack 2
@@ -107,7 +107,7 @@
     (let [content (slurp "resources/games/demo.txt")
           game-data (parser/parse-file content)
           moves (game/apply-all-moves (:moves-by-phase game-data))
-          get-non-empty (fn [board] (->> board vals (remove #(= :empty %))))]
+          get-non-empty (fn [board] (->> board vals (remove #(= :blank %))))]
       (testing "dvonn board"
         (let [board (-> (:dvonn moves) last :board)
               non-empty (get-non-empty board)]

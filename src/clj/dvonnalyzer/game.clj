@@ -1,5 +1,11 @@
 (ns dvonnalyzer.game)
 
+(def blank :blank)
+
+(defn blank?
+  ([p] (= p blank))
+  ([board p] (blank? (get board p))))
+
 (defn abs [n] (if (pos? n) n (- n)))
 
 (defn char-range
@@ -8,29 +14,32 @@
   (map char (range (int start) (inc (int end)))))
 
 (defn empty-board
-  "Generate empty board as hashmap with values of :empty."
+  "Generate empty board as hashmap with values of blank."
   []
-  (let [all-coords (for [x (char-range \a \k)
-                         y (range 1 6)]
-                     (keyword (str x y)))
-        final-coords (remove #{:a4 :a5 :b5 :j1 :k1 :k2}
-                             all-coords)]
-    (zipmap final-coords (repeat :empty))))
+  (let [rect-grid (for [x (char-range \a \k) y (range 1 6)]
+                    (keyword (str x y)))
+        dvonn-grid (remove #{:a4 :a5 :b5 :j1 :k1 :k2} rect-grid)]
+    (zipmap dvonn-grid (repeat blank))))
+
+(defn make-move
+  [& {:keys [stack dvonn color]
+      :or {stack 1 dvonn 0}}]
+  (let [move {:stack stack :dvonn dvonn}]
+    (if (nil? color)
+      move
+      (assoc move :color color))))
 
 (defn can-put-piece?
   [board to]
-  (= (to board) :empty))
+  (blank? board to))
 
 (defn put-dvonn-piece
-  ([board to] (assoc board to {:stack 1
-                               :dvonn 1}))
+  ([board to] (assoc board to (make-move :stack 1 :dvonn 1)))
   ([board to player] (put-dvonn-piece board to)))
 
 (defn put-piece
   [board to player]
-  (assoc board to {:color player
-                   :stack 1
-                   :dvonn 0}))
+  (assoc board to (make-move :color player :stack 1)))
 
 (defn distance
   [from to]
@@ -47,8 +56,8 @@
 
 (defn can-move-piece?
   [board from to player]
-  (let [origin (from board)
-        target (to board)]
+  (let [origin (get board from)
+        target (get board to)]
     (and origin
          target
          (= (:color origin) player)
@@ -59,14 +68,14 @@
 
 (defn move-piece
   ([board [from to]]
-  (let [getter (fn [key] (map #(get-in board [% key] 0) [from to]))
-        stack (reduce + (getter :stack))
-        dvonn (reduce + (getter :dvonn))]
-    (drop-dead-spots
-     (merge board {from :empty
-                   to {:color (get-in board [from :color])
-                       :stack stack
-                       :dvonn dvonn}}))))
+    (let [sum (fn [key] (->> [from to]
+                             (map #(get-in board [% key] 0))
+                             (reduce +)))]
+      (drop-dead-spots
+       (merge board {from blank
+                     to (make-move :color (get-in board [from :color])
+                                   :stack (sum :stack)
+                                   :dvonn (sum :dvonn))}))))
   ([board [from to] player] (move-piece board [from to])))
 
 (defn alternate-player
@@ -109,7 +118,7 @@
 (defn- complement-last-put
   "Last player doesn't have too much of a choice so his stone is put automatically."
   [board player]
-  (let [move (-> (filter #(= (get board %) :empty) (keys board)) first)]
+  (let [move (-> (filter #(= (get board %) blank) (keys board)) first)]
     (put-piece board move player)))
 
 (defn find-dvonn
@@ -131,6 +140,7 @@
                                  (+ (second v) (int \1))]))))
 
 (defn neighbours
+  "Get non-empty adjacent positions."
   [board from]
   (let [curr (coord->vec from)
         moves [[0 1]
@@ -141,9 +151,10 @@
                [-1 -1]]]
     (->> (map #(map + curr %) moves)
          (map vec->coord)
-         (filterv #(not= (get board % :empty) :empty)))))
+         (filterv #(not= (get board % blank) blank)))))
 
 (defn find-accessible
+  "Find spots accessible from the source with simplified DFS."
   [board from]
   (loop [visited (hash-set from)
          queue (list from)]
