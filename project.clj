@@ -8,9 +8,11 @@
                  [ring/ring-defaults "0.1.2"]
                  [selmer "0.8.2"]
                  [clj-http-lite "0.2.0"]
-                 [org.clojure/clojurescript "0.0-2371"]]
+                 [org.clojure/clojurescript "0.0-2816"]
+                 [reagent "0.5.0"]
+                 [cljs-ajax "0.3.13"]]
   :plugins [[lein-ring "0.8.13"]
-            [lein-cljsbuild "1.0.3"]]
+            [lein-cljsbuild "1.0.6"]]
   :cljsbuild {
     :builds [{
         :source-paths ["src/cljs"]

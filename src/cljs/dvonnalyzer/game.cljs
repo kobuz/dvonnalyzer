@@ -11,12 +11,12 @@
 (defn char-range
   "Return range of characters including end."
   [start end]
-  (map char (range (int start) (inc (int end)))))
+  (map char (range (.charCodeAt start) (inc (.charCodeAt end)))))
 
 (defn empty-board
   "Generate empty board as hashmap with values of blank."
   []
-  (let [rect-grid (for [x (char-range \a \k) y (range 1 6)]
+  (let [rect-grid (for [x (char-range "a" "k") y (range 1 6)]
                     (keyword (str x y)))
         dvonn-grid (remove #{:a4 :a5 :b5 :j1 :k1 :k2} rect-grid)]
     (zipmap dvonn-grid (repeat blank))))
@@ -130,14 +130,15 @@
 (defn coord->vec
   "Change symbolic coordinates to vector of ints, eg. \"b5\" -> [1, 4]"
   [s]
-  (let [to-int #(-> s name % int)]
-    (vector (- (to-int first) (int \a))
-            (- (to-int second) (int \1)))))
+  (let [to-int #(-> s name % .charCodeAt)]
+    (vector (- (to-int first) (.charCodeAt "a"))
+            (- (to-int second) (.charCodeAt "1")))))
 
 (defn vec->coord
   [v]
-  (keyword (apply str (map char [(+ (first v) (int \a))
-                                 (+ (second v) (int \1))]))))
+  (keyword (apply str
+                  (map #(String/fromCharCode %) [(+ (first v) (.charCodeAt "a"))
+                                                 (+ (second v) (.charCodeAt "1"))]))))
 
 (defn neighbours
   "Get non-empty adjacent positions."

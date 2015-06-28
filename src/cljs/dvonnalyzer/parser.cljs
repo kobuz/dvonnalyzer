@@ -1,5 +1,5 @@
 (ns dvonnalyzer.parser
-  (:require [clojure.string :as str]))
+  (:require [clojure.string]))
 
 (defn- make-keyword-move
   [move]
@@ -13,10 +13,10 @@
   "Returns sequence of moves as pair <number, move>."
   [game-file]
   (let [terms (-> game-file
-                  (str/split #"\]")
-                  (last)
-                  (str/trim)
-                  (str/split #" "))
+                  (clojure.string/split #"\]")
+                  last
+                  clojure.string/trim
+                  (clojure.string/split #" "))
                   unnecessary-number? #(re-find #"\d+\." %)
         final-terms (remove unnecessary-number? terms)
         keyword-moves (map make-keyword-move final-terms)]
@@ -27,7 +27,7 @@
   [game-file]
   (->> game-file
        (re-seq #"(\w+) \[(.+?)\]")
-       (map #(vector (-> (second %) str/lower-case keyword)
+       (map #(vector (-> (second %) clojure.string/lower-case keyword)
                      (last %)))
        flatten
        (apply hash-map)))
