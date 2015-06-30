@@ -1,13 +1,11 @@
-(ns dvonnalyzer.hello
+(ns dvonnalyzer.core
   (:require [clojure.string :refer [capitalize]]
             [reagent.core :as reagent :refer [atom]]
             [ajax.core :refer [GET]]
             [dvonnalyzer.game :as game]
             [dvonnalyzer.parser :as parser]))
 
-(def move-id (atom 0))
-
-(defn nav-component []
+(defn nav-component [move-id]
   [:div
    [:p "Move id is " @move-id]
    [:input {:type "button" :value "Prev" :on-click #(swap! move-id dec)}]
@@ -19,8 +17,22 @@
     (for [[mkey mval] metadata]
       ^{:key mkey} [:li (str (-> mkey name capitalize) ": " mval)])]])
 
+(defn board-component
+  [board move-id]
+  (let [x (+ @move-id 2)]
+    [:p (str "board " x)]))
+
 (defn dvonn-component [game-data]
-  [metadata-component (:metadata game-data)])
+  (let [move-id (atom 0)]
+    [:div
+      [metadata-component (:metadata game-data)]
+      [nav-component move-id]
+      [board-component 3 move-id]]))
+
+(defn render-dvonn
+  [game-data]
+  (reagent/render-component [dvonn-component game-data]
+                            (js/document.getElementById "app")))
 
 (defn error-handler [{:keys [status status-text]}]
   (.log js/console (str "something bad happened: " status " " status-text)))
@@ -32,8 +44,3 @@
 
 (GET "/game/demo-content" {:handler handler
                            :error-handler error-handler})
-
-(defn render-dvonn
-  [game-data]
-  (reagent/render-component [dvonn-component game-data]
-                            (js/document.getElementById "app")))
