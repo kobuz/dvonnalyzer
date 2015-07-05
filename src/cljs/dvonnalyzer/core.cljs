@@ -5,13 +5,13 @@
             [dvonnalyzer.game :as game]
             [dvonnalyzer.parser :as parser]))
 
-(defn draw-move-jumper [current-move current move-id]
+(defn draw-move-jumper [current-move current? move-id]
   (.log js/console "jumper ")
   (let [{:keys [number player move]} current-move
         color (str (name player) "-move")]
     [:input
      {:type "button"
-      :class (join " " ["move" color (if current "current-move")])
+      :class (join " " ["move" color (if current? "current-move")])
       :value (game/prn-move move)
       :on-click #(reset! move-id number)}]))
 
@@ -23,8 +23,8 @@
      [:br]
      (for [move moves]
        (let [number (:number move)
-             current (= number move-number)]
-         ^{:key (str "goto-" number)} [draw-move-jumper move current move-id]))]))
+             current? (= number move-number)]
+         ^{:key (str "goto-" number)} [draw-move-jumper move current? move-id]))]))
 
 (defn metadata-component [metadata]
   [:p "Metadata"
@@ -33,26 +33,26 @@
       ^{:key mkey} [:li (str (-> mkey name capitalize) ": " mval)])]])
 
 (defn draw-hex [hex]
-  [:span.hex-box
+  (.log js/console "draw hex")
    (if (game/blank? hex)
-     [:span.circle.empty " "]
+     [:span.circle.empty]
      (let [{:keys [dvonn stack color] :or {dvonn 0}} hex]
        (if (some? color)
          [:span {:class (->> ["circle" (name color) (if (> dvonn 0) "has-dvonn")]
                              (filter some?) (join " "))} stack]
-         [:span.circle.full-dvonn])))])
+         [:span.circle.full-dvonn]))))
 
-(defn draw-board [board]
+(defn draw-board [board move]
   (.log js/console "draw board")
   (let [order (->> board keys sort (group-by #(second (name %))) reverse)]
     (for [[idx values] order]
-      ^{:key (str "row-" idx)} [:p (for [coord values]
+      ^{:key (str "row-" idx)} [:div (for [coord values]
             ^{:key (str "hex-" coord)} [draw-hex (get board coord)])])))
 
 (defn board-component
   [moves move-id]
   (let [{:keys [board number move player]} (nth moves @move-id)]
-    [:div.board (draw-board board)]))
+    [:div.board (draw-board board move)]))
 
 (defn dvonn-component [game-data]
   (let [move-id (atom 0)
