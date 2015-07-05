@@ -29,6 +29,7 @@
        (slurp "resources/games/demo.txt"))
   (GET "/game/:game-id" [game-id]
        (render-file "templates/game.html" {}))
+  (route/resources "/")
   (route/not-found "<h1>Not Found</h1>"))
 
 (def app

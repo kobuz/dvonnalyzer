@@ -1,5 +1,5 @@
 (ns dvonnalyzer.core
-  (:require [clojure.string :refer [capitalize]]
+  (:require [clojure.string :refer [capitalize join]]
             [reagent.core :as reagent :refer [atom]]
             [ajax.core :refer [GET]]
             [dvonnalyzer.game :as game]
@@ -17,17 +17,36 @@
     (for [[mkey mval] metadata]
       ^{:key mkey} [:li (str (-> mkey name capitalize) ": " mval)])]])
 
+(defn draw-hex
+  [hex]
+   (if (game/blank? hex)
+     [:span.circle.empty " "]
+     (let [{:keys [dvonn stack color] :or {dvonn 0}} hex]
+       (if (some? color)
+         [:span {:class (->> ["circle" (name color) (if (> dvonn 0) "has-dvonn")]
+                             (filter some?) (join " "))} stack]
+         [:span.circle.full-dvonn " "]))))
+
+(defn draw-board
+  [board]
+  (.log js/console "draw board")
+  (let [order (->> board keys sort (group-by #(second (name %))))]
+    (for [[idx values] order]
+      ^{:key (str "row-" idx)} [:p (for [coord values]
+            ^{:key (str "ble" coord)} [draw-hex (get board coord)])])))
+
 (defn board-component
-  [board move-id]
-  (let [x (+ @move-id 2)]
-    [:p (str "board " x)]))
+  [moves move-id]
+  (let [{:keys [board number move player]} (nth moves @move-id)]
+    [:div.board (draw-board board)]))
 
 (defn dvonn-component [game-data]
-  (let [move-id (atom 0)]
+  (let [move-id (atom 0)
+        moves (game/apply-all-moves (:moves-by-phase game-data))]
     [:div
       [metadata-component (:metadata game-data)]
       [nav-component move-id]
-      [board-component 3 move-id]]))
+      [board-component (:all moves) move-id]]))
 
 (defn render-dvonn
   [game-data]
@@ -38,8 +57,7 @@
   (.log js/console (str "something bad happened: " status " " status-text)))
 
 (defn handler [response]
-  (let [game-data (parser/parse-file response)
-        moves (game/apply-all-moves (:moves-by-phase game-data))]
+  (let [game-data (parser/parse-file response)]
     (render-dvonn game-data)))
 
 (GET "/game/demo-content" {:handler handler

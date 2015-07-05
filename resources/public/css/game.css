@@ -1,0 +1,38 @@
+.board {
+  background: #d3d3d3;
+}
+
+.circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
+  font-size: 20px;
+  text-align: center;
+  line-height: 50px;
+  padding: 20px;
+}
+
+.empty {
+  width: 200px;
+  height: 200px;
+  background: #808080;
+}
+
+.black {
+  background: #000;
+  color: #fff;
+}
+
+.white {
+  background: #fff;
+  color: #000;
+  border: 5px solid #000;
+}
+
+.has-dvonn {
+  border: 1px solid #f00;
+}
+
+.full-dvonn {
+  background: #f00;
+}

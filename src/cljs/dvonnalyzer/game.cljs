@@ -137,7 +137,7 @@
 (defn vec->coord
   [v]
   (keyword (apply str
-                  (map #(String/fromCharCode %) [(+ (first v) (.charCodeAt "a"))
+                  (map #(String.fromCharCode %) [(+ (first v) (.charCodeAt "a"))
                                                  (+ (second v) (.charCodeAt "1"))]))))
 
 (defn neighbours
@@ -205,4 +205,5 @@
                                      (alternate-player (:player last-put)))]
     {:dvonn dvonn-phase
      :put put-phase
-     :move move-phase}))
+     :move move-phase
+     :all (into [] (concat dvonn-phase put-phase move-phase))}))
