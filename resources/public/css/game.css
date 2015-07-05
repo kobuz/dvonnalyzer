@@ -1,5 +1,30 @@
 .board {
   background: #d3d3d3;
+  display: inline-block;
+}
+
+.board-row-4 {
+  margin-left: 26px;
+}
+
+.board-row-3 {
+  margin-left: 52;
+}
+
+.board-row-2 {
+  margin-left: 78px;
+}
+
+.board-row-1 {
+  margin-left: 104px;
+}
+
+.unused-hex {
+  width: 50px;
+  height: 50px;
+  display: inline-block;
+  margin: 2px;
+  line-height: 50px;
 }
 
 .circle {

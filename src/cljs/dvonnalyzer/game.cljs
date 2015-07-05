@@ -18,12 +18,15 @@
   [start end]
   (map char (range (.charCodeAt start) (inc (.charCodeAt end)))))
 
+(defn rect-grid []
+  (for [x (char-range "a" "k") y (range 1 6)]
+    (keyword (str x y))))
+
 (defn empty-board
   "Generate empty board as hashmap with values of blank."
   []
-  (let [rect-grid (for [x (char-range "a" "k") y (range 1 6)]
-                    (keyword (str x y)))
-        dvonn-grid (remove #{:a4 :a5 :b5 :j1 :k1 :k2} rect-grid)]
+  (let [unnecessary-coords #{:a4 :a5 :b5 :j1 :k1 :k2}
+        dvonn-grid (remove unnecessary-coords (rect-grid))]
     (zipmap dvonn-grid (repeat blank))))
 
 (defn make-move

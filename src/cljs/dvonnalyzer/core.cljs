@@ -42,12 +42,19 @@
                              (filter some?) (join " "))} stack]
          [:span.circle.full-dvonn]))))
 
+(defn draw-row [board idx coords]
+  (.log js/console "draw row")
+  [:div {:class (str "board-row-" idx)}
+   (for [coord coords]
+     (if-let [stack (get board coord)]
+       ^{:key (str "hex-" coord)} [draw-hex (get board coord)]
+       ^{:key (str "empty-" coord)} [:span.unused-hex]))])
+
 (defn draw-board [board move]
   (.log js/console "draw board")
-  (let [order (->> board keys sort (group-by #(second (name %))) reverse)]
-    (for [[idx values] order]
-      ^{:key (str "row-" idx)} [:div (for [coord values]
-            ^{:key (str "hex-" coord)} [draw-hex (get board coord)])])))
+  (let [order (->> (game/rect-grid) sort (group-by #(second (name %))) reverse)]
+    (for [[idx coords] order]
+      ^{:key (str "row-" idx)} [draw-row board idx coords])))
 
 (defn board-component
   [moves move-id]
