@@ -6,6 +6,11 @@
   ([p] (= p blank))
   ([board p] (blank? (get board p))))
 
+(defn prn-move [move]
+  (cond
+   (keyword? move) (name move)
+   (vector? move) (str (name (get move 0)) " to " (name (get move 1)))))
+
 (defn abs [n] (if (pos? n) n (- n)))
 
 (defn char-range

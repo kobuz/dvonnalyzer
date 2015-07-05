@@ -5,11 +5,26 @@
             [dvonnalyzer.game :as game]
             [dvonnalyzer.parser :as parser]))
 
-(defn nav-component [move-id]
-  [:div
-   [:p "Move id is " @move-id]
-   [:input {:type "button" :value "Prev" :on-click #(swap! move-id dec)}]
-   [:input {:type "button" :value "Next" :on-click #(swap! move-id inc)}]])
+(defn draw-move-jumper [current-move current move-id]
+  (.log js/console "jumper ")
+  (let [{:keys [number player move]} current-move
+        color (str (name player) "-move")]
+    [:input
+     {:type "button"
+      :class (join " " ["move" color (if current "current-move")])
+      :value (game/prn-move move)
+      :on-click #(reset! move-id number)}]))
+
+(defn nav-component [moves move-id]
+  (let [move-number @move-id]
+    [:div
+     [:input {:type "button" :value "Prev" :on-click #(swap! move-id dec)}]
+     [:input {:type "button" :value "Next" :on-click #(swap! move-id inc)}]
+     [:br]
+     (for [move moves]
+       (let [number (:number move)
+             current (= number move-number)]
+         ^{:key (str "goto-" number)} [draw-move-jumper move current move-id]))]))
 
 (defn metadata-component [metadata]
   [:p "Metadata"
@@ -17,8 +32,7 @@
     (for [[mkey mval] metadata]
       ^{:key mkey} [:li (str (-> mkey name capitalize) ": " mval)])]])
 
-(defn draw-hex
-  [hex]
+(defn draw-hex [hex]
   [:span.hex-box
    (if (game/blank? hex)
      [:span.circle.empty " "]
@@ -28,13 +42,12 @@
                              (filter some?) (join " "))} stack]
          [:span.circle.full-dvonn])))])
 
-(defn draw-board
-  [board]
+(defn draw-board [board]
   (.log js/console "draw board")
   (let [order (->> board keys sort (group-by #(second (name %))) reverse)]
     (for [[idx values] order]
       ^{:key (str "row-" idx)} [:p (for [coord values]
-            ^{:key (str "ble" coord)} [draw-hex (get board coord)])])))
+            ^{:key (str "hex-" coord)} [draw-hex (get board coord)])])))
 
 (defn board-component
   [moves move-id]
@@ -44,9 +57,12 @@
 (defn dvonn-component [game-data]
   (let [move-id (atom 0)
         moves (game/apply-all-moves (:moves-by-phase game-data))]
-    [:div
+    [:div {:on-key-down #(condp = (.-which %)
+                           37 (swap! move-id dec)
+                           39 (swap! move-id inc)
+                           nil)}
       [metadata-component (:metadata game-data)]
-      [nav-component move-id]
+      [nav-component (:all moves) move-id]
       [board-component (:all moves) move-id]]))
 
 (defn render-dvonn

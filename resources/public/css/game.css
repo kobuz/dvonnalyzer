@@ -40,3 +40,19 @@
 .full-dvonn {
   background: #f00;
 }
+
+.move {
+  background: #0f0;
+}
+
+.current-move {
+  background: #f00;
+}
+
+.black-move {
+  color: #fff;
+}
+
+.white-move {
+  color: #000;
+}
