@@ -19,18 +19,19 @@
 
 (defn draw-hex
   [hex]
+  [:span.hex-box
    (if (game/blank? hex)
      [:span.circle.empty " "]
      (let [{:keys [dvonn stack color] :or {dvonn 0}} hex]
        (if (some? color)
          [:span {:class (->> ["circle" (name color) (if (> dvonn 0) "has-dvonn")]
                              (filter some?) (join " "))} stack]
-         [:span.circle.full-dvonn " "]))))
+         [:span.circle.full-dvonn])))])
 
 (defn draw-board
   [board]
   (.log js/console "draw board")
-  (let [order (->> board keys sort (group-by #(second (name %))))]
+  (let [order (->> board keys sort (group-by #(second (name %))) reverse)]
     (for [[idx values] order]
       ^{:key (str "row-" idx)} [:p (for [coord values]
             ^{:key (str "ble" coord)} [draw-hex (get board coord)])])))

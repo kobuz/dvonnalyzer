@@ -2,6 +2,12 @@
   background: #d3d3d3;
 }
 
+.hex-box {
+  width: 200px;
+  height: 200px;
+  box-sizing: content-box;
+}
+
 .circle {
   width: 100px;
   height: 100px;
@@ -13,8 +19,6 @@
 }
 
 .empty {
-  width: 200px;
-  height: 200px;
   background: #808080;
 }
 
