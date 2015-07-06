@@ -9,9 +9,9 @@
   (.log js/console "jumper ")
   (let [{:keys [number player move]} current-move
         color (str (name player) "-move")]
-    [:input
+    [:input.move
      {:type "button"
-      :class (join " " ["move" color (if current? "current-move")])
+      :class (join " " [color (if current? "current-move")])
       :value (game/prn-move move)
       :on-click #(reset! move-id number)}]))
 
@@ -21,10 +21,10 @@
      [:input {:type "button" :value "Prev" :on-click #(swap! move-id dec)}]
      [:input {:type "button" :value "Next" :on-click #(swap! move-id inc)}]
      [:br]
-     (for [move moves]
-       (let [number (:number move)
-             current? (= number move-number)]
-         ^{:key (str "goto-" number)} [draw-move-jumper move current? move-id]))]))
+     (for [move moves
+           :let [number (:number move)
+                 current? (= number move-number)]]
+       ^{:key (str "goto-" number)} [draw-move-jumper move current? move-id])]))
 
 (defn metadata-component [metadata]
   [:p "Metadata"
@@ -32,29 +32,39 @@
     (for [[mkey mval] metadata]
       ^{:key mkey} [:li (str (-> mkey name capitalize) ": " mval)])]])
 
-(defn draw-hex [hex]
-  (.log js/console "draw hex")
-   (if (game/blank? hex)
-     [:span.circle.empty]
-     (let [{:keys [dvonn stack color] :or {dvonn 0}} hex]
-       (if (some? color)
-         [:span {:class (->> ["circle" (name color) (if (> dvonn 0) "has-dvonn")]
-                             (filter some?) (join " "))} stack]
-         [:span.circle.full-dvonn]))))
+(defn curr-hex? [move coord]
+  (cond
+   (keyword? move) (= move coord)
+   (vector? move) (or (curr-hex? (first move) coord)
+                      (curr-hex? (second move) coord))))
 
-(defn draw-row [board idx coords]
+(defn draw-hex [hex current?]
+  (.log js/console "draw hex ")
+  (cond
+   (nil? hex) [:span.unused-hex]
+   (game/blank? hex) [:span.circle.empty {:class (when current? "current-hex")}]
+   :else
+   (let [{:keys [dvonn stack color] :or {dvonn 0}} hex]
+     (if (some? color)
+       [:span.circle {:class (->> [(name color)
+                                   (when (> dvonn 0) "has-dvonn")
+                                   (when current? "current-hex")]
+                                  (filter some?) (join " "))}
+        (when (> stack 1) stack)]
+       [:span.circle.full-dvonn {:class (when current? "current-hex")}]))))
+
+(defn draw-row [board move idx coords]
   (.log js/console "draw row")
   [:div {:class (str "board-row-" idx)}
-   (for [coord coords]
-     (if-let [stack (get board coord)]
-       ^{:key (str "hex-" coord)} [draw-hex (get board coord)]
-       ^{:key (str "empty-" coord)} [:span.unused-hex]))])
+   (for [coord coords
+         :let [current-move (curr-hex? move coord)]]
+     ^{:key (str "hex-" coord)} [draw-hex (get board coord) current-move])])
 
 (defn draw-board [board move]
   (.log js/console "draw board")
   (let [order (->> (game/rect-grid) sort (group-by #(second (name %))) reverse)]
     (for [[idx coords] order]
-      ^{:key (str "row-" idx)} [draw-row board idx coords])))
+      ^{:key (str "row-" idx)} [draw-row board move idx coords])))
 
 (defn board-component
   [moves move-id]

@@ -62,6 +62,10 @@
   background: #f00;
 }
 
+.current-hex {
+  box-shadow: 0 0 0 3px #00f;
+}
+
 .move {
   background: #0f0;
 }
