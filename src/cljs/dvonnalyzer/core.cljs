@@ -5,6 +5,8 @@
             [dvonnalyzer.game :as game]
             [dvonnalyzer.parser :as parser]))
 
+(defonce move-id (atom 0))
+
 (defn draw-move-jumper [current-move current? move-id]
   (.log js/console "jumper ")
   (let [{:keys [number player move]} current-move
@@ -72,8 +74,7 @@
     [:div.board (draw-board board move)]))
 
 (defn dvonn-component [game-data]
-  (let [move-id (atom 0)
-        moves (game/apply-all-moves (:moves-by-phase game-data))]
+  (let [moves (game/apply-all-moves (:moves-by-phase game-data))]
     [:div {:on-key-down #(condp = (.-which %)
                            37 (swap! move-id dec)
                            39 (swap! move-id inc)

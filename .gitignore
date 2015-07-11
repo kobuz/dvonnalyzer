@@ -2,10 +2,12 @@
 /lib
 /classes
 /checkouts
+/resources/public/js
 pom.xml
 pom.xml.asc
 *.jar
 *.class
+*.log
 /.lein-*
 /.nrepl-port
 app.js
