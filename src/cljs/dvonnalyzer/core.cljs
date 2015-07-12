@@ -5,7 +5,8 @@
             [dvonnalyzer.game :as game]
             [dvonnalyzer.parser :as parser]))
 
-(defonce move-id (atom 0))
+(defonce move-id (atom nil))
+(defonce count-of-moves (atom nil))
 
 (defn draw-move-jumper [current-move current? move-id]
   (.log js/console "jumper ")
@@ -20,8 +21,15 @@
 (defn nav-component [moves move-id]
   (let [move-number @move-id]
     [:div
-     [:input {:type "button" :value "Prev" :on-click #(swap! move-id dec)}]
-     [:input {:type "button" :value "Next" :on-click #(swap! move-id inc)}]
+     [:div (str "move " @move-id " out of " @count-of-moves)]
+     [:input {:type "button"
+              :value "Prev"
+              :on-click #(swap! move-id dec)
+              :disabled (if (zero? move-number) "disabled" "")}]
+     [:input {:type "button"
+              :value "Next"
+              :on-click #(swap! move-id inc)
+              :disabled (if (= move-number @count-of-moves) "disabled" "")}]
      [:br]
      (for [move moves
            :let [number (:number move)
@@ -80,7 +88,7 @@
                            39 (swap! move-id inc)
                            nil)}
       [metadata-component (:metadata game-data)]
-      [nav-component (:all moves) move-id]
+      [nav-component (vec (drop 1 (:all moves))) move-id]
       [board-component (:all moves) move-id]]))
 
 (defn render-dvonn
@@ -92,8 +100,13 @@
   (.log js/console (str "something bad happened: " status " " status-text)))
 
 (defn handler [response]
+  (.log js/console "fetched game")
   (let [game-data (parser/parse-file response)]
+    (when (nil? @move-id)
+      (reset! move-id 0)
+      (reset! count-of-moves (count (:moves game-data))))
     (render-dvonn game-data)))
 
-(GET "/game/demo-content" {:handler handler
-                           :error-handler error-handler})
+(if true;(nil? @move-id)
+  (GET "/game/demo-content" {:handler handler
+                             :error-handler error-handler}))

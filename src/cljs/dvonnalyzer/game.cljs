@@ -210,8 +210,12 @@
         last-put (last put-phase)
         move-phase (apply-move-phase (:move moves-by-phase)
                                      (:board last-put)
-                                     (alternate-player (:player last-put)))]
+                                     (alternate-player (:player last-put)))
+        zero-move {:board (empty-board)
+                   :number 0
+                   :move "start"
+                   :player ""}]
     {:dvonn dvonn-phase
      :put put-phase
      :move move-phase
-     :all (into [] (concat dvonn-phase put-phase move-phase))}))
+     :all (into [zero-move] (concat dvonn-phase put-phase move-phase))}))

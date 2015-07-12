@@ -20,6 +20,7 @@
   :clean-targets ^{:protect false} [:target-path "out"]
   :cljsbuild {
     :builds [{
+        :id "dev"
         :source-paths ["src/cljs"]
         :figwheel true
         :compiler {
