@@ -37,10 +37,6 @@
       move
       (assoc move :color color))))
 
-(defn can-put-piece?
-  [board to]
-  (blank? board to))
-
 (defn put-dvonn-piece
   ([board to] (assoc board to (make-move :stack 1 :dvonn 1)))
   ([board to player] (put-dvonn-piece board to)))
@@ -48,29 +44,6 @@
 (defn put-piece
   [board to player]
   (assoc board to (make-move :color player :stack 1)))
-
-(defn distance
-  [from to]
-  (let [transform (fn [x] (map int (name x)))
-        [fromX fromY] (transform from)
-        [toX toY] (transform to)
-        diffX (abs (- fromX toX))
-        diffY (abs (- fromY toY))]
-    (cond
-      (zero? diffX) diffY
-      (zero? diffY) diffX
-      (= diffX diffY) diffX
-      :else nil)))
-
-(defn can-move-piece?
-  [board from to player]
-  (let [origin (get board from)
-        target (get board to)]
-    (and origin
-         target
-         (= (:color origin) player)
-         (= (distance from to)
-            (:stack origin)))))
 
 (declare drop-dead-spots)
 

@@ -8,6 +8,14 @@
 (defonce move-id (atom nil))
 (defonce count-of-moves (atom nil))
 
+(defn prev-move []
+  (if (> @move-id 0)
+    (swap! move-id dec)))
+
+(defn next-move []
+  (if (< @move-id @count-of-moves)
+    (swap! move-id inc)))
+
 (defn draw-move-jumper [current-move current? move-id]
   (.log js/console "jumper ")
   (let [{:keys [number player move]} current-move
@@ -18,18 +26,21 @@
       :value (game/prn-move move)
       :on-click #(reset! move-id number)}]))
 
+(defn- cond-disable [pred]
+  (if pred "disabled" ""))
+
 (defn nav-component [moves move-id]
   (let [move-number @move-id]
     [:div
      [:div (str "move " @move-id " out of " @count-of-moves)]
      [:input {:type "button"
               :value "Prev"
-              :on-click #(swap! move-id dec)
-              :disabled (if (zero? move-number) "disabled" "")}]
+              :on-click #(prev-move)
+              :disabled (cond-disable (zero? move-number))}]
      [:input {:type "button"
               :value "Next"
-              :on-click #(swap! move-id inc)
-              :disabled (if (= move-number @count-of-moves) "disabled" "")}]
+              :on-click #(next-move)
+              :disabled (cond-disable (= move-number @count-of-moves))}]
      [:br]
      (for [move moves
            :let [number (:number move)
@@ -84,8 +95,8 @@
 (defn dvonn-component [game-data]
   (let [moves (game/apply-all-moves (:moves-by-phase game-data))]
     [:div {:on-key-down #(condp = (.-which %)
-                           37 (swap! move-id dec)
-                           39 (swap! move-id inc)
+                           37 (prev-move)
+                           39 (next-move)
                            nil)}
       [metadata-component (:metadata game-data)]
       [nav-component (vec (drop 1 (:all moves))) move-id]
