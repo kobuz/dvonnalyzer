@@ -53,5 +53,5 @@
         moves (extract-moves record)
         moves-by-phase (split-to-phases moves)]
     {:metadata metadata
-     :moves moves
+     :moves-count (count moves)
      :moves-by-phase moves-by-phase}))

@@ -2,8 +2,7 @@
   (:require [clojure.string :refer [capitalize join]]
             [reagent.core :as reagent :refer [atom]]
             [ajax.core :refer [GET]]
-            [dvonnalyzer.game :as game]
-            [dvonnalyzer.parser :as parser]))
+            [dvonnalyzer.game :as game]))
 
 (defonce move-id (atom nil))
 (defonce count-of-moves (atom nil))
@@ -112,12 +111,14 @@
 
 (defn handler [response]
   (.log js/console "fetched game")
-  (let [game-data (parser/parse-file response)]
+  (let [game-data (cljs.reader/read-string response)]
     (when (nil? @move-id)
       (reset! move-id 0)
-      (reset! count-of-moves (count (:moves game-data))))
+      (reset! count-of-moves (:moves-count game-data)))
     (render-dvonn game-data)))
 
 (if true;(nil? @move-id)
-  (GET "/game/demo-content" {:handler handler
-                             :error-handler error-handler}))
+  (let [game-id (-> js/window.location.pathname (.split "/") last)
+        path (str "/content/" game-id)]
+    (GET path {:handler handler
+               :error-handler error-handler})))

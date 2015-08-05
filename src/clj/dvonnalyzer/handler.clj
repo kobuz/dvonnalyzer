@@ -1,12 +1,11 @@
 (ns dvonnalyzer.handler
-  (:require [clojure.string :as str]
-            [compojure.core :refer :all]
+  (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [selmer.parser :refer [render-file]]
             [ring.util.anti-forgery :refer [anti-forgery-field]]
-            [ring.util.response :refer [redirect]]
-            [clj-http.lite.client :as client]))
+            [clj-http.lite.client :as client]
+            [dvonnalyzer.parser :as parser]))
 
 (defn- get-game-id
   [id-or-url]
@@ -20,15 +19,14 @@
 (defroutes app-routes
   (GET "/" [] (render-file "templates/home.html"
                            {:csrf (anti-forgery-field)}))
-  (POST "/game" [game-id]
-        (let [real-game-id (get-game-id game-id)]
-          (redirect (str "/game/" real-game-id))))
   (GET "/game/demo" []
        (render-file "templates/game.html" {}))
-  (GET "/game/demo-content" []
-       (slurp "resources/games/demo.txt"))
   (GET "/game/:game-id" [game-id]
        (render-file "templates/game.html" {}))
+  (GET "/content/demo" []
+       (let [content (slurp "resources/games/demo.txt")
+             parsed-game (parser/parse-file content)]
+         (pr-str parsed-game)))
   (route/resources "/")
   (route/not-found "<h1>Not Found</h1>"))
 
