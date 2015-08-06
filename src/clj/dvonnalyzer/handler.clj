@@ -16,6 +16,11 @@
   (str "http://www.littlegolem.net/servlet/sgf/"
        game-id "/game" game-id ".txt"))
 
+(defn- prepare-edn
+  [content]
+  (let [record (parser/parse-file content)]
+    (pr-str record)))
+
 (defroutes app-routes
   (GET "/" [] (render-file "templates/home.html"
                            {:csrf (anti-forgery-field)}))
@@ -24,9 +29,13 @@
   (GET "/game/:game-id" [game-id]
        (render-file "templates/game.html" {}))
   (GET "/content/demo" []
-       (let [content (slurp "resources/games/demo.txt")
-             parsed-game (parser/parse-file content)]
-         (pr-str parsed-game)))
+       (let [content (slurp "resources/games/demo.txt")]
+         (prepare-edn content)))
+  (GET "/content/:game-id" [game-id]
+       (let [url (little-golem-game-url game-id)
+             response (client/get url)
+             content (:body response)]
+         (prepare-edn content)))
   (route/resources "/")
   (route/not-found "<h1>Not Found</h1>"))
 
