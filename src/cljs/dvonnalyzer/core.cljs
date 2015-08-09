@@ -6,6 +6,7 @@
 
 (defonce move-id (atom nil))
 (defonce count-of-moves (atom nil))
+(defonce game-data (atom nil))
 
 (defn prev-move []
   (if (> @move-id 0)
@@ -28,7 +29,7 @@
 (defn- cond-disable [pred]
   (if pred "disabled" ""))
 
-(defn nav-component [moves move-id]
+(defn nav-component [moves]
   (let [move-number @move-id]
     [:div
      [:div (str "move " @move-id " out of " @count-of-moves)]
@@ -87,23 +88,27 @@
       ^{:key (str "row-" idx)} [draw-row board move idx coords])))
 
 (defn board-component
-  [moves move-id]
+  [moves]
   (let [{:keys [board number move player]} (nth moves @move-id)]
     [:div.board (draw-board board move)]))
 
-(defn dvonn-component [game-data]
-  (let [moves (game/apply-all-moves (:moves-by-phase game-data))]
-    [:div {:on-key-down #(condp = (.-which %)
-                           37 (prev-move)
-                           39 (next-move)
-                           nil)}
-      [metadata-component (:metadata game-data)]
-      [nav-component (vec (drop 1 (:all moves))) move-id]
-      [board-component (:all moves) move-id]]))
+(defn wait-component []
+  [:h2 "Please wait while game is being fetched."])
 
-(defn render-dvonn
-  [game-data]
-  (reagent/render-component [dvonn-component game-data]
+(defn dvonn-component []
+  (if (nil? @game-data)
+    (wait-component)
+    (let [moves (game/apply-all-moves (:moves-by-phase @game-data))]
+      [:div {:on-key-down #(condp = (.-which %)
+                             37 (prev-move)
+                             39 (next-move)
+                             nil)}
+       [metadata-component (:metadata @game-data)]
+       [nav-component (vec (drop 1 (:all moves)))]
+       [board-component (:all moves)]])))
+
+(defn render-dvonn []
+  (reagent/render-component [dvonn-component]
                             (js/document.getElementById "app")))
 
 (defn error-handler [{:keys [status status-text]}]
@@ -111,14 +116,20 @@
 
 (defn handler [response]
   (.log js/console "fetched game")
-  (let [game-data (cljs.reader/read-string response)]
-    (when (nil? @move-id)
-      (reset! move-id 0)
-      (reset! count-of-moves (:moves-count game-data)))
-    (render-dvonn game-data)))
+  (let [data (cljs.reader/read-string response)]
+    (reset! move-id 0)
+    (reset! count-of-moves (:moves-count data))
+    (reset! game-data data)))
 
-(if true;(nil? @move-id)
+(defn fetch-game []
   (let [game-id (-> js/window.location.pathname (.split "/") last)
         path (str "/content/" game-id)]
     (GET path {:handler handler
                :error-handler error-handler})))
+
+(defn start []
+  (when (nil? @move-id)
+    (fetch-game))
+  (render-dvonn))
+
+(start)
